@@ -7,9 +7,20 @@ import { WorkoutsModule } from './workouts/workouts.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { AiAdvisorModule } from './ai-advisor/ai-advisor.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule, UsersModule, WorkoutsModule, MetricsModule, AiAdvisorModule, PrismaModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // Esto hace que las variables estén disponibles en toda la app
+    }),
+    AuthModule, 
+    UsersModule, 
+    WorkoutsModule, 
+    MetricsModule, 
+    AiAdvisorModule, 
+    PrismaModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

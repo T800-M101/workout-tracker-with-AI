@@ -44,3 +44,10 @@ To facilitate project review, the configuration process is automated:
 git clone [https://github.com/T800-M101/workout-tracker-with-AI.git](https://github.com/T800-M101/workout-tracker-with-AI.git)
 cd workout-tracker
 cp .env.example .env
+```
+
+### You can install Prisma Studio 
+```
+npx prisma studio
+Prisma Studio is up on http://localhost:5555
+```

@@ -4,7 +4,7 @@ import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RtGuard } from 'src/common/guards/rt.guard';
-import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators/get-current-user.decorator';
+import { CurrentUser, CurrentUserId } from 'src/common/decorators/get-current-user.decorator';
 
 @ApiTags('Autenticación')
 @Controller('auth')
@@ -41,7 +41,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Renew Access Token using Refresh Token' })
   @ApiBearerAuth() // Show the padlock onSwagger
-  refresh(@GetCurrentUserId() userId: string, @GetCurrentUser('refreshToken') rt: string) {
+  refresh(@CurrentUserId() userId: string, @CurrentUser('refreshToken') rt: string) {
     return this.authService.refreshTokens(userId, rt);
   }
 }

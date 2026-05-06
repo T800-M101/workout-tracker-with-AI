@@ -14,47 +14,73 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  password     String
-  name         String?
-  hashedRt     String?
-  createdAt    DateTime      @default(now())
-  
-  // Relationships
-  workouts     Workout[]
-  bodyMetrics  BodyMetric[]
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  hashedRt  String?
+  createdAt DateTime @default(now())
+
+  workoutSessions WorkoutSession[]
+  bodyMetrics     BodyMetric[]
+  customExercises Exercise[]
+}
+
+model WorkoutSession {
+  id       String    @id @default(uuid())
+  title    String
+  date     DateTime  @default(now())
+  duration Int?
+  notes    String?
+  userId   String
+  user     User      @relation(fields: [userId], references: [id])
+  workouts Workout[]
 }
 
 model Workout {
-  id          String      @id @default(uuid())
-  title       String      // Ex: "Push Day", "Legs Focus"
-  date        DateTime    @default(now())
-  duration    Int?        // Duration in minutes
-  notes       String?     @db.Text
-  
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercises   Exercise[]
+  id String @id @default(uuid())
+
+  // RELATION TO CATALOG
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+
+  // PERFORMANCE DATA (The specific instance)
+  sets   Int
+  reps   Int
+  weight Float
+  order  Int? // Position in the workout (1st, 2nd, etc.)
+
+  // RELATION TO SESSION
+  sessionId String
+  session   WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 model Exercise {
-  id          String   @id @default(uuid())
-  name        String   // Ex: "Bench Press"
-  sets        Int      // Number of sets performed
-  reps        Int      // Repetitions per set
-  weight      Float    // Weight used in kg (e.g., 85.5)
-  
-  workoutId   String
-  workout     Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid())
+  name         String   @unique // Ex: "Bench Press", "Squats"
+  category     String? // Ex: "Strength", "Cardio"
+  muscleGroups String[] // Array of strings for targeted muscles
+  equipment    String? // Ex: "Dumbbells", "Barbell"
+  description  String?
+
+  // Optional: Link to user if you want private exercises, 
+  // or leave null for "Global/System" exercises
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  // Relation to the logs in sessions
+  workouts Workout[]
 }
 
 model BodyMetric {
-  id        String   @id @default(uuid())
-  weight    Float    // Body weight tracking (e.g., 93.0)
-  height    Float?   // Body height (e.g., 1.70)
-  date      DateTime @default(now())
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  weight     Float // Current Weight
+  height     Float? // 1.70
+  bodyFat    Float? // % Fat
+  muscleMass Float? // Muscle Mass
+  waist      Float? // Waist in cm
+  date       DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "BodyMetric" ADD COLUMN     "bodyFat" DOUBLE PRECISION,
+ADD COLUMN     "muscleMass" DOUBLE PRECISION,
+ADD COLUMN     "waist" DOUBLE PRECISION;

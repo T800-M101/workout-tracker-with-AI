@@ -18,18 +18,17 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    
     "/* --- Database & Tools --- */": "",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "db:migrate": "npx prisma migrate dev",
     "db:studio": "npx prisma studio",
-    
     "/* --- Setup & Maintenance --- */": "",
     "setup": "npm install && npm run db:up && echo 'Waiting for DB...' && sleep 5 && npm run db:migrate",
     "prisma:generate": "npx prisma generate"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.94.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",

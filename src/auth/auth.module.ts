@@ -4,6 +4,8 @@ import { AuthController } from './auth.controller'; // Importación necesaria
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { AtStrategy } from './strategies/at.strategy';
+import { RtStrategy } from './strategies/rt.strategy';
 
 @Module({
   imports: [
@@ -14,7 +16,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       signOptions: { expiresIn: '1d' },
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, AtStrategy, RtStrategy ],
   controllers: [AuthController], 
 })
 export class AuthModule {}

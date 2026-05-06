@@ -51,3 +51,9 @@ cp .env.example .env
 npx prisma studio
 Prisma Studio is up on http://localhost:5555
 ```
+### The Swagger Flow
+Once the server restarts without errors, the flow to test the refresh is as follows:
+1. Login: Run the login endpoint. Swagger will return an access token and a refresh token.
+2. Authorize: Copy the refresh token (not the access token).
+3. Authorize Button: Paste this token into the "Authorize" button at the top of Swagger.
+4. Execute Refresh: Now press "Execute" on the /api/auth/refresh endpoint.

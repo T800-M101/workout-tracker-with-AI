@@ -1,9 +1,12 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { RtGuard } from 'src/common/guards/rt.guard';
+import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators/get-current-user.decorator';
 
+@ApiTags('Autenticación')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -31,5 +34,14 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credential.' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @UseGuards(RtGuard) // Custom Guard used for 'jwt-refresh'
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Renew Access Token using Refresh Token' })
+  @ApiBearerAuth() // Show the padlock onSwagger
+  refresh(@GetCurrentUserId() userId: string, @GetCurrentUser('refreshToken') rt: string) {
+    return this.authService.refreshTokens(userId, rt);
   }
 }

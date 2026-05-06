@@ -1,19 +1,21 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prima.service';
 import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private config: ConfigService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -44,32 +46,66 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    // 1. Search for the user
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
+    if (!user) throw new ForbiddenException('Access Denied');
 
-    if (!user) {
-      throw new UnauthorizedException('Credenciales incorrectas');
-    }
-
-    // 2. Compare passwords
     const passwordMatches = await bcrypt.compare(dto.password, user.password);
+    if (!passwordMatches) throw new ForbiddenException('Access Denied');
 
-    if (!passwordMatches) {
-      throw new UnauthorizedException('Credenciales incorrectas');
-    }
+    const tokens = await this.getTokens(user.id, user.email);
 
-    // 3. Generate and return the JWT
-    const payload = { sub: user.id, email: user.email };
+    // We store the RT hash in the database
+    await this.updateRtHash(user.id, tokens.refresh_token);
 
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
+    return tokens;
+  }
+
+  async getTokens(userId: string, email: string) {
+    const [at, rt] = await Promise.all([
+      this.jwtService.signAsync(
+        { sub: userId, email },
+        {
+          secret: this.config.get('JWT_SECRET'),
+          expiresIn: '15m',
+        },
+      ),
+      this.jwtService.signAsync(
+        { sub: userId, email },
+        {
+          secret: this.config.get('JWT_REFRESH_SECRET'),
+          expiresIn: '7d',
+        },
+      ),
+    ]);
+
+    return { access_token: at, refresh_token: rt };
+  }
+
+  async refreshTokens(userId: string, rt: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.hashedRt) throw new ForbiddenException('Access Denied');
+
+    const rtMatches = await bcrypt.compare(rt, user.hashedRt);
+    if (!rtMatches) throw new ForbiddenException('Access Denied');
+
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRtHash(user.id, tokens.refresh_token);
+    return tokens;
+  }
+
+  async updateRtHash(userId: string, rt: string): Promise<void> {
+    // We hash the refresh token before saving it for security (Cybersecurity Best Practice)
+    const hash = await bcrypt.hash(rt, 10);
+
+    await this.prisma.user.update({
+      where: {
+        id: userId,
       },
-    };
+      data: {
+        hashedRt: hash,
+      },
+    });
   }
 }

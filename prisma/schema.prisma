@@ -18,6 +18,7 @@ model User {
   email        String        @unique
   password     String
   name         String?
+  hashedRt     String?
   createdAt    DateTime      @default(now())
   
   // Relationships

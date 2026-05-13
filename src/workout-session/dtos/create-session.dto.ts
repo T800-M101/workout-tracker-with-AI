@@ -1,51 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsDateString, IsInt, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsNotEmpty } from 'class-validator';
+
+
 
 export class CreateSessionDto {
   @ApiProperty({ 
-    example: 'Monday Strength - Upper Body', 
-    description: 'The name or title of the workout session',
-    required: false 
+    example: 'Push Day - Chest & Triceps', 
+    description: 'The name or focus of your gym visit' 
   })
-  @IsOptional()
   @IsString()
-  name?: string;
+  @IsNotEmpty()
+  title!: string; 
 
   @ApiProperty({ 
-    example: new Date().toISOString(), 
-    description: 'ISO 8601 timestamp for the start of the session' 
-  })
-  @IsDateString()
-  startedAt!: string;
-
-  @ApiProperty({ 
-    example: new Date(Date.now() + 3600000).toISOString(), 
-    description: 'ISO 8601 timestamp for the end of the session',
-    required: false 
-  })
-  @IsOptional()
-  @IsDateString()
-  endedAt?: string;
-
-  @ApiProperty({ 
-    example: 'Felt strong today, focus on progressive overload on bench press.', 
-    description: 'Personal notes about the session',
-    required: false 
+    example: 'Feeling energetic, slept 8 hours.', 
+    required: false,
+    description: 'General notes about the session' 
   })
   @IsOptional()
   @IsString()
   notes?: string;
-
-  @ApiProperty({ 
-    example: 8, 
-    description: 'Rate of Perceived Exertion (1-10)',
-    minimum: 1,
-    maximum: 10,
-    required: false 
-  })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(10)
-  rpe?: number;
 }

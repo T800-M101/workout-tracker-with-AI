@@ -1,6 +1,7 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreateExerciseDto, ExerciseCategory } from './dtos/create-exercise.dto';
 import { PrismaService } from 'src/prisma/prima.service';
+import { UpdateExerciseDto } from './dtos/update-exercise.dto';
 
 @Injectable()
 export class ExerciseService {
@@ -8,7 +9,7 @@ export class ExerciseService {
 
   /**
    * Creates a new exercise in the global catalog.
-   */
+  */
  async create(userId: string, dto: CreateExerciseDto) {
   const existing = await this.prisma.exercise.findUnique({
     where: { name: dto.name },
@@ -25,7 +26,6 @@ export class ExerciseService {
       muscleGroups: dto.muscleGroups,
       equipment: dto.equipment,
       description: dto.description,
-      // THIS IS THE FIX:
       user: {
         connect: { id: userId }
       }
@@ -49,7 +49,7 @@ export class ExerciseService {
   }
 
   /**
-   * Finds a specific exercise definition by ID.
+   * Finds an specific exercise definition by ID.
    */
   async findById(id: string) {
     const exercise = await this.prisma.exercise.findUnique({
@@ -62,4 +62,33 @@ export class ExerciseService {
 
     return exercise;
   }
+
+   /**
+   * Updates an specific exercise definition by ID.
+   */
+
+  async update(id: string, userId: string, dto: UpdateExerciseDto) {
+  const exercise = await this.prisma.exercise.findUnique({ where: { id } });
+  
+  if (!exercise) throw new NotFoundException('Exercise not found');
+  if (exercise.userId !== userId) throw new ForbiddenException('Not your exercise');
+
+  return this.prisma.exercise.update({
+    where: { id },
+    data: dto,
+  });
+}
+
+ /**
+   * Delete an specific exercise definition by ID.
+   */
+async remove(id: string, userId: string) {
+  const exercise = await this.prisma.exercise.findUnique({ where: { id } });
+  
+  if (!exercise) throw new NotFoundException('Exercise not found');
+  if (exercise.userId !== userId) throw new ForbiddenException('Not your exercise');
+
+  await this.prisma.exercise.delete({ where: { id } });
+  return;
+}
 }

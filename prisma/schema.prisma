@@ -38,21 +38,22 @@ model WorkoutSession {
 }
 
 model Workout {
-  id String @id @default(uuid())
-
-  // RELATION TO CATALOG
+  id         String   @id @default(uuid())
   exerciseId String
   exercise   Exercise @relation(fields: [exerciseId], references: [id])
 
-  // PERFORMANCE DATA (The specific instance)
-  sets   Int
-  reps   Int
-  weight Float
-  order  Int? // Position in the workout (1st, 2nd, etc.)
+  sets       Int
+  reps       Int
+  weight     Float
+  order      Int?
+  
+  // NEW: Add a notes field here too. 
+  // Session notes are for "I felt tired today." 
+  // Workout notes are for "The left shoulder felt a bit tight during this set."
+  notes      String? 
 
-  // RELATION TO SESSION
-  sessionId String
-  session   WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId  String
+  session    WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 model Exercise {

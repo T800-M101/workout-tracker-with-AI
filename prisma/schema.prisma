@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,75 +7,86 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String?
-  hashedRt  String?
-  createdAt DateTime @default(now())
+// 1. Definition of Enums
+enum ExerciseCategory {
+  STRENGTH
+  CARDIO
+  HIIT
+  FLEXIBILITY
+  BALANCE 
+}
 
+// 2. User Model
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  password        String
+  name            String?
+  hashedRt        String?
+  createdAt       DateTime         @default(now())
+  
   workoutSessions WorkoutSession[]
   bodyMetrics     BodyMetric[]
-  customExercises Exercise[]
+  customExercises Exercise[]       @relation("UserExercises")
 }
 
+// 3. Training session (The global container)
 model WorkoutSession {
-  id       String    @id @default(uuid())
-  title    String
-  date     DateTime  @default(now())
-  duration Int?
-  notes    String?
-  userId   String
-  user     User      @relation(fields: [userId], references: [id])
-  workouts Workout[]
+  id        String    @id @default(uuid())
+  title     String
+  date      DateTime  @default(now())
+  duration  Int?
+  notes     String?
+  
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  workouts  Workout[]
 }
 
+// 4. The log of a specific exercise within a session
 model Workout {
-  id         String   @id @default(uuid())
+  id         String         @id @default(uuid())
   exerciseId String
-  exercise   Exercise @relation(fields: [exerciseId], references: [id])
-
+  exercise   Exercise       @relation(fields: [exerciseId], references: [id])
+  
   sets       Int
   reps       Int
   weight     Float
   order      Int?
+  notes      String?
   
-  // NEW: Add a notes field here too. 
-  // Session notes are for "I felt tired today." 
-  // Workout notes are for "The left shoulder felt a bit tight during this set."
-  notes      String? 
-
   sessionId  String
   session    WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
+// 5. The catalog of exercises (The definition)
 model Exercise {
-  id           String   @id @default(uuid())
-  name         String   @unique // Ex: "Bench Press", "Squats"
-  category     String? // Ex: "Strength", "Cardio"
-  muscleGroups String[] // Array of strings for targeted muscles
-  equipment    String? // Ex: "Dumbbells", "Barbell"
+  id           String           @id @default(uuid())
+  name         String           @unique 
+  category     ExerciseCategory 
+  muscleGroups String[]         
+  equipment    String?          
   description  String?
 
-  // Optional: Link to user if you want private exercises, 
-  // or leave null for "Global/System" exercises
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
+  // Relación con el creador (opcional)
+  userId       String?
+  user         User?            @relation("UserExercises", fields: [userId], references: [id])
+  
+  workouts     Workout[]
 
-  // Relation to the logs in sessions
-  workouts Workout[]
+  @@map("exercises")
 }
 
+// 6. Body metrics
 model BodyMetric {
   id         String   @id @default(uuid())
-  weight     Float // Current Weight
-  height     Float? // 1.70
-  bodyFat    Float? // % Fat
-  muscleMass Float? // Muscle Mass
-  waist      Float? // Waist in cm
+  weight     Float
+  height     Float?
+  bodyFat    Float?
+  muscleMass Float?
+  waist      Float?
   date       DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

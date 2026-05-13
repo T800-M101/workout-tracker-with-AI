@@ -1,6 +1,6 @@
 {
   "name": "workout-tracker",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "AI-Powered Workout and Body Metrics Tracker",
   "author": "Guillermo Moran",
   "private": true,
@@ -23,9 +23,12 @@
     "db:down": "docker compose down",
     "db:migrate": "npx prisma migrate dev",
     "db:studio": "npx prisma studio",
+    "db:seed": "npx prisma db seed",
+    "db:reset": "npx prisma migrate reset",
     "/* --- Setup & Maintenance --- */": "",
     "setup": "npm install && npm run db:up && echo 'Waiting for DB...' && sleep 5 && npm run db:migrate",
     "prisma:generate": "npx prisma generate"
+    
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.94.0",
@@ -91,5 +94,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "prisma": {
+  "seed": "ts-node prisma/seed.ts"
+}
 }

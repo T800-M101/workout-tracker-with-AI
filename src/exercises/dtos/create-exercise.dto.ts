@@ -7,16 +7,8 @@ import {
   ArrayNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-
-export enum ExerciseCategory {
-  STRENGTH = 'STRENGTH',
-  CARDIO = 'CARDIO',
-  FLEXIBILITY = 'FLEXIBILITY',
-  BALANCE = 'BALANCE',
-  HIIT = 'HIIT',
-  SPORTS = 'SPORTS',
-}
-
+import { ExerciseCategory } from '@prisma/client';
+export { ExerciseCategory } from '@prisma/client';
 export class CreateExerciseDto {
   @ApiProperty({ 
     example: 'Barbell Squat', 
@@ -33,7 +25,7 @@ export class CreateExerciseDto {
   })
   @IsEnum(ExerciseCategory)
   category!: ExerciseCategory;
-
+  
   @ApiProperty({ 
     example: ['Quads', 'Glutes', 'Hamstrings'], 
     description: 'List of target muscle groups' 

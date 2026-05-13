@@ -1,7 +1,8 @@
 import { Injectable, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { CreateExerciseDto, ExerciseCategory } from './dtos/create-exercise.dto';
+import { CreateExerciseDto } from './dtos/create-exercise.dto';
 import { PrismaService } from 'src/prisma/prima.service';
 import { UpdateExerciseDto } from './dtos/update-exercise.dto';
+import { ExerciseCategory } from '@prisma/client';
 
 @Injectable()
 export class ExerciseService {
@@ -11,21 +12,20 @@ export class ExerciseService {
    * Creates a new exercise in the global catalog.
   */
  async create(userId: string, dto: CreateExerciseDto) {
+  // 1. Verification of existence 
   const existing = await this.prisma.exercise.findUnique({
     where: { name: dto.name },
+    select: { id: true } // Solo pedimos el ID por eficiencia, no todo el objeto
   });
 
   if (existing) {
     throw new ConflictException(`Exercise "${dto.name}" already exists.`);
   }
 
+  // 2. Create execrcise
   return this.prisma.exercise.create({
     data: {
-      name: dto.name,
-      category: dto.category,
-      muscleGroups: dto.muscleGroups,
-      equipment: dto.equipment,
-      description: dto.description,
+      ...dto, 
       user: {
         connect: { id: userId }
       }

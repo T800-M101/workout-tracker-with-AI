@@ -1,12 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BodyMetricsService } from './body-metrics.service';
+import { PrismaService } from 'src/prisma/prima.service';
 
 describe('BodyMetricsService', () => {
   let service: BodyMetricsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [BodyMetricsService],
+      providers: [BodyMetricsService,{
+    provide: PrismaService,
+    useValue: {
+      bodyMetric: { 
+        create: jest.fn(),
+        findMany: jest.fn(),
+      },
+    },
+  },],
     }).compile();
 
     service = module.get<BodyMetricsService>(BodyMetricsService);

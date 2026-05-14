@@ -8,7 +8,18 @@ describe('WorkoutSessionController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [WorkoutSessionController],
-      providers: [WorkoutSessionService],
+      providers: [
+        {
+          provide: WorkoutSessionService,
+          useValue: {
+            create: jest.fn().mockResolvedValue({ id: 1, userId: 1 }),
+            findAll: jest.fn().mockResolvedValue([]),
+            findOne: jest.fn().mockResolvedValue({ id: 1 }),
+            update: jest.fn().mockResolvedValue({ id: 1 }),
+            remove: jest.fn().mockResolvedValue({ id: 1 }),
+          },
+        },
+      ],
     }).compile();
 
     controller = module.get<WorkoutSessionController>(WorkoutSessionController);

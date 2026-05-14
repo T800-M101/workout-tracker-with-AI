@@ -10,7 +10,6 @@ import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Injectable()
 export class AuthService {
@@ -110,20 +109,4 @@ export class AuthService {
       },
     });
   }
-}
-
-export function ApiUpdtaeExercises() {
-  return applyDecorators(
-    ApiOperation({
-      summary: 'Update an exercise definition',
-      description:
-        'Updates specific fields of an existing exercise. Only the creator can update it.',
-    }),
-    ApiResponse({ status: 200, description: 'Exercise updated successfully.' }),
-    ApiResponse({
-      status: 403,
-      description: 'Forbidden: You do not own this exercise.',
-    }),
-    ApiResponse({ status: 404, description: 'Exercise not found.' }),
-  );
 }
